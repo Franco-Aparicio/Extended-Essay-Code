@@ -8,66 +8,59 @@ namespace ExtendedEssayCode {
 
         private readonly int n;
         private readonly int side;
-        private int[][] board;
+        private int[,] board;
+        private int[,] solution;
         private Random r = new Random();
         
         public Sudoku(int n) {
             this.n = n;
             side = n * n;
-            board = new int[side][]; 
-           BoardGen();
+            board = new int[side, side];
+            solution = new int[side, side];
+           MakeCompleted();
+           PrintBoard(solution);
+           // board = MakeCompleted().Select(x=>x.ToArray()).ToArray();
         }
 
-        private void BoardGen() {
-            int[] baseNums = Enumerable.Range(0, n).ToArray();
-            List<int> rows = new List<int>();
-            List<int> cols = new List<int>();
-            List<List<int>> b = new List<List<int>>();
-            foreach (int r in Shuffle(baseNums)) {
-                foreach (int i in Shuffle(baseNums)) {
-                    rows.Add(i * n + r);
+        private void MakeCompleted() {
+            int[] nums = Enumerable.Range(1, side).ToArray();
+            while (true) {
+                try {
+                    List<List<int>> rows = Enumerable.Range(0, side).Select(x=>nums.ToList()).ToList();
+                    List<List<int>> cols = Enumerable.Range(0, side).Select(x=>nums.ToList()).ToList();
+                    List<List<int>> squares = Enumerable.Range(0, side).Select(x=>nums.ToList()).ToList();
+                    for (int i = 0; i < side; i++) {
+                        for (int j = 0; j < side; j++) {
+                            List<int> choices = rows[i].Intersect(cols[j]).Intersect(squares[i / n * n + j / n]).ToList();
+                            int choice = choices[r.Next(choices.Count)];
+                            solution[i, j] = choice;
+                            rows[i].Remove(choice);
+                            cols[j].Remove(choice);
+                            squares[i / n * n + j / n].Remove(choice);
+                        }
+                    }
+                    return;
                 }
-            }
-            foreach (int c in Shuffle(baseNums)) {
-                foreach (int i in Shuffle(baseNums)) {
-                    cols.Add(i * n + c);
-                }
-            }
-            int[] nums = Shuffle(Enumerable.Range(1, side).ToArray());
-            foreach (int r in rows) {
-                List<int> temp = new List<int>();
-                foreach (int c in cols) {
-                    temp.Add(nums[Pattern(r, c)]);
-                }
-                b.Add(temp);
-            }
-            board = b.Select(x=>x.ToArray()).ToArray();
-            PrintBoard();
-            int square = side * side;
-            int empties = square * 3 / 4;
-            foreach (int cell in Shuffle(Enumerable.Range(0, square-1).ToArray()).Take(empties)) {
-                board[cell / side][cell % side] = 0;
+                catch (ArgumentOutOfRangeException) { }
             }
         }
-
+        
         private int[] Shuffle(int[] arr) {
             return arr.OrderBy(x => r.Next()).ToArray();
         }
-
-        // Used for baseline pattern for valid solution
-        private int Pattern(int r, int c) {
-            return (n * (r % n) + r / n + c) % side;
-        }
         
-        public void PrintBoard() {
+        public void PrintBoard(int[,] b=null) {
+            if (b == null) {
+                b = board;
+            }
             Console.WriteLine("\n\x1B[4m" + new String(' ', n * n + n + 1) + "\x1B[0m");
-            for (int i = 0; i < board.Length; i++) {
+            for (int i = 0; i < b.GetLength(0); i++) {
                 if ((i + 1) % n == 0) {
                     Console.Write("\x1B[4m");
                 }
                 Console.Write("|");
-                for (int j = 0; j < board[0].Length; j++) {
-                    Console.Write(board[i][j]);
+                for (int j = 0; j < b.GetLength(1); j++) {
+                    Console.Write(b[i, j]);
                     if ((j + 1) % n == 0) {
                         Console.Write("|");
                     }
