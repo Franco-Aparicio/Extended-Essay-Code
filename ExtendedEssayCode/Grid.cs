@@ -198,20 +198,23 @@ namespace ExtendedEssayCode {
         
         public static void PrintBoard(int[,] b) {
             int n = (int) Math.Sqrt((double) b.GetLength(0));
-            Console.WriteLine("\n\x1B[4m" + new String(' ', n * n + n + 1) + "\x1B[0m");
+            // Console.WriteLine("\n\x1B[4m" + new String(' ', n * n + n + 1) + "\x1B[0m");
+            // Console.WriteLine(new String('-', b.GetLength(0)*3+5));
             for (int i = 0; i < b.GetLength(0); i++) {
-                if ((i + 1) % n == 0) {
-                    Console.Write("\x1B[4m");
+                if (i % n == 0) {
+                    Console.WriteLine(new String('-', b.GetLength(0)*3+2*n));
                 }
                 Console.Write("|");
                 for (int j = 0; j < b.GetLength(1); j++) {
-                    Console.Write(b[i, j]);
+                    Console.Write("{0, -3}", b[i, j]);
                     if ((j + 1) % n == 0) {
-                        Console.Write("|");
+                        Console.Write("{0, -2}", "|");
                     }
                 }
-                Console.WriteLine("\x1B[0m");
+                // Console.WriteLine("\x1B[0m");
+                Console.WriteLine();
             }
+            Console.WriteLine(new String('-', b.GetLength(0)*3+2*n));
         }
     }
 }
