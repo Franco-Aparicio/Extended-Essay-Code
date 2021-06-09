@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Text;
 
 namespace ExtendedEssayCode {
@@ -14,6 +15,7 @@ namespace ExtendedEssayCode {
         public Group[] Columns;
         public Group[] Boxes;
         public Cell[] Cells;
+        public int[,] Board;
 
         protected static bool CompletedGrid = false;
 
@@ -60,7 +62,9 @@ namespace ExtendedEssayCode {
             // first completed grid
             if (!CompletedGrid) {
                 CompletedGrid = true;
-                Draw();
+                // Draw();
+                Board = MakeUseful();
+                // PrintBoard(Board);
             }
         }
 
@@ -177,15 +181,37 @@ namespace ExtendedEssayCode {
             }
         }
 
-        private int[][] MakeUseful() {
-            char[][] preBoard = new char[Rows.Length][];
+        private int[,] MakeUseful() {
+            int[,] board = new int[Rows.Length, Rows.Length];
             for (int i = 0; i < Rows.Length; i++) {
                 for (int j = 0; j < Rows[i].Cells.Length; j++) {
-                    preBoard[i][j] = Rows[i].Cells[j].Value;
+                    char val = Rows[i].Cells[j].Value;
+                    if (Enumerable.Range(49, 9).Contains(val)) {
+                        board[i, j] = val - 48;
+                        continue;
+                    }
+                    board[i, j] = val - 55;
                 }
             }
-            int[][] board = new int[Rows.Length][];
             return board;
+        }
+        
+        public static void PrintBoard(int[,] b) {
+            int n = (int) Math.Sqrt((double) b.GetLength(0));
+            Console.WriteLine("\n\x1B[4m" + new String(' ', n * n + n + 1) + "\x1B[0m");
+            for (int i = 0; i < b.GetLength(0); i++) {
+                if ((i + 1) % n == 0) {
+                    Console.Write("\x1B[4m");
+                }
+                Console.Write("|");
+                for (int j = 0; j < b.GetLength(1); j++) {
+                    Console.Write(b[i, j]);
+                    if ((j + 1) % n == 0) {
+                        Console.Write("|");
+                    }
+                }
+                Console.WriteLine("\x1B[0m");
+            }
         }
     }
 }
