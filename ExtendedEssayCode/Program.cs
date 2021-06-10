@@ -7,7 +7,7 @@ namespace ExtendedEssayCode {
 
         static void Main(string[] args) {
             // start generating grid
-            int n = 2;
+            int n = 3;
             int[,] board = new int[n, n];
             var tasks = new[] {
                 Task.Factory.StartNew(() => new Grid(n).Board),
@@ -15,9 +15,9 @@ namespace ExtendedEssayCode {
                 Task.Factory.StartNew(() => new Grid(n).Board),
                 Task.Factory.StartNew(() => new Grid(n).Board)}; 
             var things = Task.WhenAll(tasks);
-            foreach (var task in things.Result) {
-                if (task != null) {
-                    board = (int[,]) task.Clone();
+            foreach (var res in things.Result) {
+                if (res != null) {
+                    board = (int[,]) res.Clone();
                 }
             }
             Grid.PrintBoard(board);
