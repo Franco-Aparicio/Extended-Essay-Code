@@ -1,6 +1,4 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace ExtendedEssayCode {
     class Program {
@@ -9,13 +7,8 @@ namespace ExtendedEssayCode {
 
         static void Main(string[] args) {
             // start generating grid
-            int n = 5;
+            int n = 2;
             int[,] board = new int[n, n];
-            // for (int i = 0; i < 4; i++) {
-            //     Thread t = new Thread(() => { new Grid(n); });
-            //     t.Priority = ThreadPriority.Highest;
-            //     t.Start();
-            // }
             var tasks = new[] {
                 Task.Factory.StartNew(() => new Grid(n).Board),
                 Task.Factory.StartNew(() => new Grid(n).Board),
