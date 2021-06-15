@@ -20,33 +20,30 @@ namespace Algorithms {
             for (int i = 0; i < n * n; i++) {
                 for (int j = 0; j < n * n; j++) {
                     int val = board[i, j];
-                    vars[i*n*n+j] = new Variable(val, val != 0 ? new int[] {-1, val} : Enumerable.Range(1, n * n).ToArray());
+                    vars[i * n * n + j] = new Variable(val, val != 0 ? 
+                        new int[] {val} : new int[] {-1}
+                            .Concat(Enumerable.Range(1, n * n)).ToArray());
                 }
             }
+            int ii = 0;
             for (int i = 0; i < n * n; i++) {
+                int jj = 0;
                 for (int j = 0; j < n * n; j++) {
-                    for (int k = 0; k < n * n; k++) {
-                        if (k > j) {
-                            // constraints.Add(new Variable[] {vars[i * n * n + j], vars[i * n * n + k]});
-                            // Console.WriteLine($"({i * n * n + j}, {i * n * n + k})");
-                        }
-                        // constraints.Add(new Variable[] {vars[i], vars[j * n * n + i]});
-                        // constraints.Add(new Variable[] {vars[i + j], vars[k * n * n + i]});
-                        Console.WriteLine($"({i + j * n * n}, {k * n * n + j})");
+                    int kk = ii + jj + 1;
+                    for (int k = j + 1; k < n * n; k++) {
+                        int temp = j % n == n - 1 ? 2 * n : 0;
+                        kk = k % n == n - 1 ? kk + n * (n - 1) + 1 : kk + 1;
+                        constraints.Add(new Variable[] {vars[i * n * n + j], vars[i * n * n + k]});
+                        // Console.WriteLine($"({i * n * n + j}, {i * n * n + k})");
+                        constraints.Add(new Variable[] {vars[j * n * n + i], vars[k * n * n + i]});
+                        // Console.WriteLine($"({j * n * n + i}, {k * n * n + i})");
+                        constraints.Add(new Variable[] {vars[ii + jj], vars[kk + temp]});
+                        // Console.WriteLine($"({ii + jj}, {kk + temp})");
                     }
+                    jj = j % n == n - 1 ? jj + n * (n - 1) + 1 : jj + 1;
                 }
+                ii = i % n == n - 1 ? ii + n * n * (n - 1) + n: ii + n;
             }
-            // for (int i = 0; i < vars.Length; i++) {
-            //     Console.Write($"{vars[i].Value} ");
-            //     if ((i + 1) % (n * n) == 0) {
-            //         Console.WriteLine();
-            //     }
-            // }
-            // for (int i = 0; i < n * n * n * n * 3 * (n * n - 1); i++) {
-            //     for (int j = 0; j < 2; j++) {
-            //         constraints[i, j] = vars[]
-            //     }
-            // }
         }
 
         private static int[,] LoadBoard(int n, int bnum) {
