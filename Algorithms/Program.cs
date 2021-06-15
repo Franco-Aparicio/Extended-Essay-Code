@@ -25,10 +25,15 @@ namespace Algorithms {
             }
             for (int i = 0; i < n * n; i++) {
                 for (int j = 0; j < n * n; j++) {
-                    if (j == 0) continue;
-                    // constraints.Add(new Variable[] {vars[i * n * n], vars[i * n * n + j]});
-                    // constraints.Add(new Variable[] {vars[i], vars[j * n * n + i]});
-                    
+                    for (int k = 0; k < n * n; k++) {
+                        if (k > j) {
+                            // constraints.Add(new Variable[] {vars[i * n * n + j], vars[i * n * n + k]});
+                            // Console.WriteLine($"({i * n * n + j}, {i * n * n + k})");
+                        }
+                        // constraints.Add(new Variable[] {vars[i], vars[j * n * n + i]});
+                        // constraints.Add(new Variable[] {vars[i + j], vars[k * n * n + i]});
+                        Console.WriteLine($"({i + j * n * n}, {k * n * n + j})");
+                    }
                 }
             }
             // for (int i = 0; i < vars.Length; i++) {
