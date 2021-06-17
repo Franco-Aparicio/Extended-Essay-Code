@@ -31,14 +31,14 @@ namespace Algorithms {
                 for (int j = 0; j < n * n; j++) {
                     int kk = ii + jj + 1;
                     for (int k = j + 1; k < n * n; k++) {
-                        int temp = j % n == n - 1 ? 2 * n : 0;
-                        kk = k % n == n - 1 ? kk + n * (n - 1) + 1 : kk + 1;
+                        int temp = j % n == n - 1 ? (n - 1) * n : 0;
                         constraints.Add(new Variable[] {vars[i * n * n + j], vars[i * n * n + k]});
                         // Console.WriteLine($"({i * n * n + j}, {i * n * n + k})");
                         constraints.Add(new Variable[] {vars[j * n * n + i], vars[k * n * n + i]});
                         // Console.WriteLine($"({j * n * n + i}, {k * n * n + i})");
                         constraints.Add(new Variable[] {vars[ii + jj], vars[kk + temp]});
                         // Console.WriteLine($"({ii + jj}, {kk + temp})");
+                        kk = k % n == n - 1 ? kk + n * (n - 1) + 1 : kk + 1;
                     }
                     jj = j % n == n - 1 ? jj + n * (n - 1) + 1 : jj + 1;
                 }
