@@ -32,11 +32,30 @@ namespace Algorithms {
                         new int[,] {{val}, {0}} : defaultDomain, i * n * n + j);
                 }
             }
-            Dictionary<Variable[], List<int[]>> allowed = GetAllowed(vars, defaultAllowed, n);
+            Dictionary<int[], List<int[]>> allowed = GetAllowed(vars, defaultAllowed, n);
+            List<int[]> keys = new List<int[]>();
+            foreach (var key in allowed.Keys) {
+                Console.WriteLine($"({key[0]}, {key[1]})");
+                keys.Add(key);
+            }
+            foreach (var v in allowed[keys[0]]) {
+                Console.WriteLine($"({v[0]}, {v[1]})");
+            }
+            // ForwardChecking FC = new ForwardChecking(allowed);
+            // FC.FC(vars);
+            // foreach (int[] action in FC.Solution) {
+            //     vars[action[0]].Value = action[1];
+            // }
+            // for (int i = 0; i < n * n; i++) {
+            //     for (int j = 0; j < n * n; j++) {
+            //         board[i, j] = vars[i * n * n + j].Value;
+            //     }
+            // }
+            // PrintBoard(board);
         }
 
-        private static Dictionary<Variable[], List<int[]>> GetAllowed(Variable[] vars, List<int[]> defaultAllowed, int n) {
-            var allowed = new Dictionary<Variable[], List<int[]>>();
+        private static Dictionary<int[], List<int[]>> GetAllowed(Variable[] vars, List<int[]> defaultAllowed, int n) {
+            var allowed = new Dictionary<int[], List<int[]>>();
             int ii = 0;
             for (int i = 0; i < n * n; i++) {
                 int jj = 0;
@@ -47,35 +66,37 @@ namespace Algorithms {
                         Variable v1 = vars[i * n * n + j];
                         Variable v2 = vars[i * n * n + k];
                         if (v1.Domain.GetLength(1) == 1 || v2.Domain.GetLength(1) == 1) {
-                            allowed.Add(new Variable[] {v1, v2}, GetSpecial(v1, v2));
+                            allowed.Add(new int[] {v1.Index, v2.Index}, GetSpecial(v1, v2));
                         }
                         else {
-                            allowed.Add(new Variable[] {v1, v2}, defaultAllowed);
+                            allowed.Add(new int[] {v1.Index, v2.Index}, defaultAllowed);
                         }
-                        // Console.WriteLine($"({i * n * n + j}, {i * n * n + k})");
-                        v1 = vars[j * n * n + i];
-                        v2 = vars[k * n * n + i];
-                        if (v1.Domain.GetLength(1) == 1 || v2.Domain.GetLength(1) == 1) {
-                            allowed.Add(new Variable[] {v1, v2}, GetSpecial(v1, v2));
-                        }
-                        else {
-                            allowed.Add(new Variable[] {v1, v2}, defaultAllowed);
-                        }
-                        // Console.WriteLine($"({j * n * n + i}, {k * n * n + i})");
-                        v1 = vars[ii + jj];
-                        v2 = vars[kk + corrector];
-                        if (v1.Domain.GetLength(1) == 1 || v2.Domain.GetLength(1) == 1) {
-                            allowed.Add(new Variable[] {v1, v2}, GetSpecial(v1, v2));
-                        }
-                        else {
-                            allowed.Add(new Variable[] {v1, v2}, defaultAllowed);
-                        }
-                        // Console.WriteLine($"({ii + jj}, {kk + corrector})");
+                        // Console.WriteLine($"({v1.Index}, {v2.Index}), ({i * n * n + j}, {i * n * n + k})");
+                        // // Console.WriteLine($"({i * n * n + j}, {i * n * n + k})");
+                        // v1 = vars[j * n * n + i];
+                        // v2 = vars[k * n * n + i];
+                        // if (v1.Domain.GetLength(1) == 1 || v2.Domain.GetLength(1) == 1) {
+                        //     allowed.Add(new Variable[] {v1, v2}, GetSpecial(v1, v2));
+                        // }
+                        // else {
+                        //     allowed.Add(new Variable[] {v1, v2}, defaultAllowed);
+                        // }
+                        // // Console.WriteLine($"({j * n * n + i}, {k * n * n + i})");
+                        // v1 = vars[ii + jj];
+                        // v2 = vars[kk + corrector];
+                        // if (v1.Domain.GetLength(1) == 1 || v2.Domain.GetLength(1) == 1) {
+                        //     allowed.Add(new Variable[] {v1, v2}, GetSpecial(v1, v2));
+                        // }
+                        // else {
+                        //     allowed.Add(new Variable[] {v1, v2}, defaultAllowed);
+                        // }
+                        // // Console.WriteLine($"({ii + jj}, {kk + corrector})");
                         kk = k % n == n - 1 ? kk + n * (n - 1) + 1 : kk + 1;
                     }
                     jj = j % n == n - 1 ? jj + n * (n - 1) + 1 : jj + 1;
                 }
                 ii = i % n == n - 1 ? ii + n * n * (n - 1) + n: ii + n;
+                return allowed;
             }
             return allowed;
         }
@@ -119,6 +140,27 @@ namespace Algorithms {
                 }
             }
             return board;
+        }
+
+        private static void PrintBoard(int[,] b) {
+            int n = (int) Math.Sqrt((double) b.GetLength(0));
+            // Console.WriteLine("\n\x1B[4m" + new String(' ', n * n + n + 1) + "\x1B[0m");
+            // Console.WriteLine(new String('-', b.GetLength(0)*3+5));
+            for (int i = 0; i < b.GetLength(0); i++) {
+                if (i % n == 0) {
+                    Console.WriteLine(new String('-', b.GetLength(0)*3+2*n));
+                }
+                Console.Write("|");
+                for (int j = 0; j < b.GetLength(1); j++) {
+                    Console.Write("{0, -3}", b[i, j]);
+                    if ((j + 1) % n == 0) {
+                        Console.Write("{0, -2}", "|");
+                    }
+                }
+                // Console.WriteLine("\x1B[0m");
+                Console.WriteLine();
+            }
+            Console.WriteLine(new String('-', b.GetLength(0)*3+2*n));
         }
     }
 }

@@ -4,13 +4,25 @@ using System.Linq;
 
 namespace Algorithms {
     
-    public class FC {
+    public class ForwardChecking {
         
         private Dictionary<Variable[], List<int[]>> allowed;
-        private List<int[]> Solution = new List<int[]>();
+        public List<Variable[]> Keys;
+        public List<int[]> Solution;
         
-        public FC(Dictionary<Variable[], List<int[]>> allowed) {
+        public ForwardChecking(Dictionary<Variable[], List<int[]>> allowed) {
             this.allowed = allowed;
+            Keys = allowed.Keys.ToList();
+        }
+
+        public bool FC(Variable[] vars) {
+            foreach (Variable var in vars) {
+                for (int i = 0; i < var.Domain.GetLength(1); i++) {
+                    var.Domain[1, i] = 0;
+                }
+            }
+            Solution = new List<int[]>();
+            return Search(vars, 1);
         }
 
         private bool Search(Variable[] vars, int level) {
@@ -22,7 +34,6 @@ namespace Algorithms {
                 if (vars.Length == 1) {
                     return true;
                 }
-
                 if (CheckForward(vars.Where(x => x.Index != var.Index).ToArray(), level, var, var.Domain[0, i]) &&
                     Search(vars.Where(x => x.Index != var.Index).ToArray(), level + 1)) return true;
                 Solution.Remove(new int[] {var.Index, var.Domain[0, i]});
@@ -33,7 +44,8 @@ namespace Algorithms {
         
         private bool CheckForward(Variable[] vars, int level, Variable var, int val) {
             foreach (Variable variable in vars) {
-                Variable[] key = var.Index < variable.Index ? new Variable[] {var, variable} : new Variable[] {variable, var};
+                // Variable[] key = var.Index < variable.Index ? new Variable[] {var, variable} : new Variable[] {variable, var};
+                Variable[] key = Keys.Find(x=>)
                 if (allowed.ContainsKey(key)) {
                     for (int i = 0; i < variable.Domain.GetLength(1); i++) {
                         if (variable.Domain[1, i] == 0 &&
