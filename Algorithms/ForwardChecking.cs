@@ -6,13 +6,13 @@ namespace Algorithms {
     
     public class ForwardChecking {
         
-        private Dictionary<Variable[], List<int[]>> allowed;
-        public List<Variable[]> Keys;
+        private Dictionary<int[], List<int[]>> allowed;
+        public Dictionary<int[], List<int[]>>.KeyCollection Keys;
         public List<int[]> Solution;
         
-        public ForwardChecking(Dictionary<Variable[], List<int[]>> allowed) {
+        public ForwardChecking(Dictionary<int[], List<int[]>> allowed) {
             this.allowed = allowed;
-            Keys = allowed.Keys.ToList();
+            Keys = allowed.Keys;
         }
 
         public bool FC(Variable[] vars) {
@@ -44,12 +44,12 @@ namespace Algorithms {
         
         private bool CheckForward(Variable[] vars, int level, Variable var, int val) {
             foreach (Variable variable in vars) {
-                // Variable[] key = var.Index < variable.Index ? new Variable[] {var, variable} : new Variable[] {variable, var};
-                Variable[] key = Keys.Find(x=>)
-                if (allowed.ContainsKey(key)) {
+                int[] k = var.Index < variable.Index ? new [] {var.Index, variable.Index} : new [] {variable.Index, var.Index};
+                var key = Keys.ToList().Find(x => x.SequenceEqual(k));
+                if (key != null) {
                     for (int i = 0; i < variable.Domain.GetLength(1); i++) {
                         if (variable.Domain[1, i] == 0 &&
-                            !allowed[key].Contains(new int[] {val, variable.Domain[0, i]})) {
+                            allowed[key].Find(x=>x.SequenceEqual(new int[] {val, variable.Domain[0, i]})) == null) {
                             variable.Domain[1, i] = level;
                         }
                     }

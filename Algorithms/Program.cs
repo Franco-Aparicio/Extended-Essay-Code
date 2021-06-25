@@ -9,7 +9,7 @@ namespace Algorithms {
         
         static void Main(string[] args) {
             int n = 3;
-            int bnum = 1;
+            int bnum = 2;
             int[,] board = LoadBoard(n, bnum);
             if (board == null) {
                 Console.WriteLine($"\n\nNo available boards of order {n} in {@"/home/noname/school/EE/ExtendedEssayCode/SudokuBoardGenerator/boards"}");
@@ -33,25 +33,17 @@ namespace Algorithms {
                 }
             }
             Dictionary<int[], List<int[]>> allowed = GetAllowed(vars, defaultAllowed, n);
-            List<int[]> keys = new List<int[]>();
-            foreach (var key in allowed.Keys) {
-                Console.WriteLine($"({key[0]}, {key[1]})");
-                keys.Add(key);
+            ForwardChecking FC = new ForwardChecking(allowed);
+            FC.FC(vars);
+            foreach (int[] action in FC.Solution) {
+                vars[action[0]].Value = action[1];
             }
-            foreach (var v in allowed[keys[0]]) {
-                Console.WriteLine($"({v[0]}, {v[1]})");
+            for (int i = 0; i < n * n; i++) {
+                for (int j = 0; j < n * n; j++) {
+                    board[i, j] = vars[i * n * n + j].Value;
+                }
             }
-            // ForwardChecking FC = new ForwardChecking(allowed);
-            // FC.FC(vars);
-            // foreach (int[] action in FC.Solution) {
-            //     vars[action[0]].Value = action[1];
-            // }
-            // for (int i = 0; i < n * n; i++) {
-            //     for (int j = 0; j < n * n; j++) {
-            //         board[i, j] = vars[i * n * n + j].Value;
-            //     }
-            // }
-            // PrintBoard(board);
+            PrintBoard(board);
         }
 
         private static Dictionary<int[], List<int[]>> GetAllowed(Variable[] vars, List<int[]> defaultAllowed, int n) {
@@ -65,31 +57,36 @@ namespace Algorithms {
                         int corrector = j % n == n - 1 ? (n - 1) * n : 0;
                         Variable v1 = vars[i * n * n + j];
                         Variable v2 = vars[i * n * n + k];
-                        if (v1.Domain.GetLength(1) == 1 || v2.Domain.GetLength(1) == 1) {
-                            allowed.Add(new int[] {v1.Index, v2.Index}, GetSpecial(v1, v2));
+                        if (!allowed.Keys.ToList().Any(x=>x.SequenceEqual(new [] {v1.Index, v2.Index}))) {
+                            if (v1.Domain.GetLength(1) == 1 || v2.Domain.GetLength(1) == 1) {
+                                allowed.TryAdd(new int[] {v1.Index, v2.Index}, GetSpecial(v1, v2));
+                            }
+                            else {
+                                allowed.TryAdd(new int[] {v1.Index, v2.Index}, defaultAllowed);
+                            }
                         }
-                        else {
-                            allowed.Add(new int[] {v1.Index, v2.Index}, defaultAllowed);
-                        }
-                        // Console.WriteLine($"({v1.Index}, {v2.Index}), ({i * n * n + j}, {i * n * n + k})");
                         // // Console.WriteLine($"({i * n * n + j}, {i * n * n + k})");
-                        // v1 = vars[j * n * n + i];
-                        // v2 = vars[k * n * n + i];
-                        // if (v1.Domain.GetLength(1) == 1 || v2.Domain.GetLength(1) == 1) {
-                        //     allowed.Add(new Variable[] {v1, v2}, GetSpecial(v1, v2));
-                        // }
-                        // else {
-                        //     allowed.Add(new Variable[] {v1, v2}, defaultAllowed);
-                        // }
+                        v1 = vars[j * n * n + i];
+                        v2 = vars[k * n * n + i];
+                        if (!allowed.Keys.ToList().Any(x=>x.SequenceEqual(new [] {v1.Index, v2.Index}))) {
+                            if (v1.Domain.GetLength(1) == 1 || v2.Domain.GetLength(1) == 1) {
+                                allowed.TryAdd(new int[] {v1.Index, v2.Index}, GetSpecial(v1, v2));
+                            }
+                            else {
+                                allowed.TryAdd(new int[] {v1.Index, v2.Index}, defaultAllowed);
+                            }
+                        }
                         // // Console.WriteLine($"({j * n * n + i}, {k * n * n + i})");
-                        // v1 = vars[ii + jj];
-                        // v2 = vars[kk + corrector];
-                        // if (v1.Domain.GetLength(1) == 1 || v2.Domain.GetLength(1) == 1) {
-                        //     allowed.Add(new Variable[] {v1, v2}, GetSpecial(v1, v2));
-                        // }
-                        // else {
-                        //     allowed.Add(new Variable[] {v1, v2}, defaultAllowed);
-                        // }
+                        v1 = vars[ii + jj];
+                        v2 = vars[kk + corrector];
+                        if (!allowed.Keys.ToList().Any(x=>x.SequenceEqual(new [] {v1.Index, v2.Index}))) {
+                            if (v1.Domain.GetLength(1) == 1 || v2.Domain.GetLength(1) == 1) {
+                                allowed.TryAdd(new int[] {v1.Index, v2.Index}, GetSpecial(v1, v2));
+                            }
+                            else {
+                                allowed.TryAdd(new int[] {v1.Index, v2.Index}, defaultAllowed);
+                            }
+                        }
                         // // Console.WriteLine($"({ii + jj}, {kk + corrector})");
                         kk = k % n == n - 1 ? kk + n * (n - 1) + 1 : kk + 1;
                     }
