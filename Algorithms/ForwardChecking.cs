@@ -13,7 +13,6 @@ namespace Algorithms {
         public ForwardChecking(Dictionary<int[], List<int[]>> allowed) {
             this.allowed = allowed;
             Keys = allowed.Keys.ToList();
-            Solution = new List<int[]>();
         }
 
         public bool FC(Variable[] vars) {
@@ -23,24 +22,31 @@ namespace Algorithms {
                 }
             }
             Solution = new List<int[]>();
-            return Search(vars, 1);
+            bool res = Search(vars, 1);
+            Console.WriteLine(res);
+            foreach (var s in Solution) {
+                Console.WriteLine($"({s[0]}, {s[1]})");
+            }
+            return res;
         }
 
         private bool Search(Variable[] vars, int level) {
             Random r = new Random();
             Variable var = vars[r.Next(vars.Length)];
-            Console.WriteLine(var.Index);
+            // Console.WriteLine(var.Index);
             for (int i = 0; i < var.Domain.GetLength(1); i++) {
                 if (var.Domain[1, i] != 0) continue;
                 var item = new int[] {var.Index, var.Domain[0, i]};
+                Console.WriteLine($"{var.Index}, {var.Domain[0, i]}");
                 Solution.Add(item);
                 if (vars.Length == 1) {
                     return true;
                 }
-                if (CheckForward(vars.Where(x => x.Index != var.Index).ToArray(), level, var, var.Domain[0, i]) &&
-                    Search(vars.Where(x => x.Index != var.Index).ToArray(), level + 1)) return true;
+                var temp = vars.Where(x => x.Index != var.Index).ToArray();
+                if (CheckForward(temp, level, var, var.Domain[0, i]) &&
+                    Search(temp, level + 1)) return true;
                 Solution.Remove(item);
-                Restore(vars.Where(x => x.Index != var.Index).ToArray(), level);
+                Restore(temp, level);
             }
             return false;
         }

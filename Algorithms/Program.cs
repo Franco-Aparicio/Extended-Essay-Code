@@ -8,8 +8,8 @@ namespace Algorithms {
     class Program {
         
         static void Main(string[] args) {
-            int n = 3;
-            int bnum = 2;
+            int n = 2;
+            int bnum = 1;
             int[,] board = LoadBoard(n, bnum);
             if (board == null) {
                 Console.WriteLine($"\n\nNo available boards of order {n} in {@"/home/noname/school/EE/ExtendedEssayCode/SudokuBoardGenerator/boards"}");
