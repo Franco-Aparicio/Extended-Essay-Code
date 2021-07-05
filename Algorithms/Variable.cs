@@ -9,7 +9,7 @@ namespace Algorithms {
         public int Index;
         public bool Assigned = false;
         public List<Variable>[] Units = new List<Variable>[3];
-        public List<Variable> Peers = new List<Variable>();
+        public List<Variable> Peers;
 
         public Variable(int value, int[,] domain, int index) {
             Value = value;

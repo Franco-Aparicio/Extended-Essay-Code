@@ -10,7 +10,7 @@ namespace SudokuBoardGenerator {
 
         static void Main(string[] args) {
             // start generating grid
-            int n = 2;
+            int n = 4;
             int[,] answer = null;
             var tasks = new[] {
                 Task.Factory.StartNew(() => new Grid(n).Board),
@@ -32,7 +32,7 @@ namespace SudokuBoardGenerator {
         public static int[,] LeaveClues(int[,] answer) {
             Random r = new Random();
             int squares = answer.GetLength(0)*answer.GetLength(1);
-            int empties = squares * 3 / 4;
+            int empties = squares * 1 / 4;
             foreach (int c in Enumerable.Range(0, squares).OrderBy(x=>r.Next()).Take(empties)) {
                 answer[c / answer.GetLength(0), c % answer.GetLength(1)] = 0;
             }
