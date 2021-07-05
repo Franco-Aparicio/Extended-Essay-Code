@@ -7,8 +7,9 @@ namespace Algorithms {
         public int Value;
         public int[,] Domain;
         public int Index;
-        // public bool Assigned = false;
+        public bool Assigned = false;
         public List<Variable>[] Units = new List<Variable>[3];
+        public List<Variable> Peers = new List<Variable>();
 
         public Variable(int value, int[,] domain, int index) {
             Value = value;
@@ -16,8 +17,19 @@ namespace Algorithms {
             Index = index;
         }
 
-        public void SetUnits(List<Variable>[] units) {
+        public void SetUnitsAndPeers(List<Variable>[] units, List<Variable> peers) {
             Units = units;
+            Peers = peers;
+        }
+
+        public int GetLeft() {
+            int count = 0;
+            for (int i = 0; i < Domain.GetLength(1); i++) {
+                if (Domain[1, i] != 0) {
+                    count++;
+                }
+            }
+            return count;
         }
     }
 }
