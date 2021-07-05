@@ -33,11 +33,12 @@ namespace Algorithms {
         private bool Search(Variable[] vars, int level) {
             Random r = new Random();
             Variable var = vars[r.Next(vars.Length)];
+            // Console.WriteLine(vars.Length);
             // Console.WriteLine(var.Index);
             for (int i = 0; i < var.Domain.GetLength(1); i++) {
                 if (var.Domain[1, i] != 0) continue;
                 var item = new int[] {var.Index, var.Domain[0, i]};
-                Console.WriteLine($"{var.Index}, {var.Domain[0, i]}");
+                // Console.WriteLine($"{var.Index}, {var.Domain[0, i]}");
                 Solution.Add(item);
                 if (vars.Length == 1) {
                     return true;
@@ -48,6 +49,7 @@ namespace Algorithms {
                 Solution.Remove(item);
                 Restore(temp, level);
             }
+            // Console.WriteLine(Solution.Count);
             return false;
         }
         
@@ -57,10 +59,13 @@ namespace Algorithms {
                 var key = Keys.Find(x => x.SequenceEqual(k));
                 if (key == null) continue;
                     for (int i = 0; i < v.Domain.GetLength(1); i++) {
-                        if (v.Domain[1, i] == 0 &&
-                            !allowed[key].Any(x=>x.SequenceEqual(new int[] {val, v.Domain[0, i]}))) {
+                        if (v.Domain[1, i] != 0) continue;
+                        if (!allowed[key].Any(x=>x.SequenceEqual(new int[] {val, v.Domain[0, i]}))) {
                             v.Domain[1, i] = level;
                         }
+                        // Console.WriteLine($"Level: {level} -- {var.Index}, {v.Index} ({val}, {v.Domain[0, i]}), {v.Domain[1, i]}");
+                        // Console.WriteLine(DWO(v));
+                        // if (DWO(v)) return false;
                     }
                     if (DWO(v)) return false;
             }
@@ -71,10 +76,10 @@ namespace Algorithms {
         private bool DWO(Variable var) {
             for (int i = 0; i < var.Domain.GetLength(1); i++) {
                 if (var.Domain[1, i] == 0) {
-                    return true;
+                    return false;
                 }
             }
-            return false;
+            return true;
         }
 
         // Restores domains to previous state

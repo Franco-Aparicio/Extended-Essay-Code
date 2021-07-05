@@ -32,18 +32,32 @@ namespace Algorithms {
                         new int[,] {{val}, {0}} : defaultDomain, i * n * n + j);
                 }
             }
-            Dictionary<int[], List<int[]>> allowed = GetAllowed(vars, defaultAllowed, n);
-            ForwardChecking FC = new ForwardChecking(allowed);
-            FC.FC(vars);
-            foreach (int[] action in FC.Solution) {
-                vars[action[0]].Value = action[1];
-            }
-            for (int i = 0; i < n * n; i++) {
-                for (int j = 0; j < n * n; j++) {
-                    board[i, j] = vars[i * n * n + j].Value;
+            // Dictionary<int[], List<int[]>> allowed = GetAllowed(vars, defaultAllowed, n);
+            SetUnits(vars, n);
+            foreach (var unit in vars[14].Units) {
+                foreach (var cell in unit) {
+                    Console.WriteLine($"({vars[14].Index}, {cell.Index})");
                 }
             }
-            PrintBoard(board);
+            // var keys = allowed.Keys.ToList();
+            // int[] k = new [] {0, 2};
+            // var key = keys.Find(x => x.SequenceEqual(k));
+            // for (int i = 0; i < vars[2].Domain.GetLength(1); i++) {
+            //     Console.WriteLine(!allowed[key].Any(x => x.SequenceEqual(new int[] {3, vars[2].Domain[0, i]})));
+            // }
+        //     ForwardChecking FC = new ForwardChecking(allowed);
+        //     // FC.FC(vars.Where(x=>x.Value == 0).ToArray());
+        //
+        //     FC.FC(vars);
+        //     foreach (int[] action in FC.Solution) {
+        //         vars[action[0]].Value = action[1];
+        //     }
+        //     for (int i = 0; i < n * n; i++) {
+        //         for (int j = 0; j < n * n; j++) {
+        //             board[i, j] = vars[i * n * n + j].Value;
+        //         }
+        //     }
+        //     PrintBoard(board);
         }
 
         private static Dictionary<int[], List<int[]>> GetAllowed(Variable[] vars, List<int[]> defaultAllowed, int n) {
@@ -96,6 +110,34 @@ namespace Algorithms {
                 return allowed;
             }
             return allowed;
+        }
+
+        private static void SetUnits(Variable[] vars, int n) {
+            for (int i = 0; i < n * n; i++) {
+                for (int j = 0; j < n * n; j++) {
+                    List<Variable>[] units = new List<Variable>[3];
+                    List<Variable> row = new List<Variable>();
+                    List<Variable> col = new List<Variable>();
+                    List<Variable> box = new List<Variable>();
+                    Variable v1 = vars[i * n * n + j];
+                    int correct = 0;
+                    for (int k = 0; k < n * n; k++) {
+                        Variable v2 = vars[i * n * n + k];
+                        row.Add(v2);
+                        v2 = vars[k * n * n + j];
+                        col.Add(v2);
+                        int r = (i - i % n) * n * n;
+                        int c = (j - j % n) * (n - 1);
+                        correct = k != 0 && k % n == 0 ? n * (n - 1): correct;
+                        v2 = vars[r + c + k + correct];
+                        box.Add(v2);
+                    }
+                    units[0] = row;
+                    units[1] = col;
+                    units[2] = box;
+                    v1.SetUnits(units);
+                }
+            }
         }
         
         private static List<int[]> GetSpecial(Variable v1, Variable v2) {
