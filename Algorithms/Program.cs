@@ -8,8 +8,9 @@ namespace Algorithms {
     class Program {
         
         static void Main(string[] args) {
-            int n = 3;
+            int n = 2;
             int bnum = 1;
+            bool fc = false;
             int[,] board = LoadBoard(n, bnum);
             if (board == null) {
                 Console.WriteLine($"\n\nNo available boards of order {n} in {@"/home/noname/school/EE/ExtendedEssayCode/SudokuBoardGenerator/boards"}");
@@ -28,9 +29,18 @@ namespace Algorithms {
                 }
             }
             SetUnitsAndPeers(vars, n);
-            ForwardChecking FC = new ForwardChecking();
-            FC.FC(vars);
-            foreach (int[] action in FC.Solution) {
+            List<int[]> solution = null;
+            if (fc) {
+                ForwardChecking FC = new ForwardChecking();
+                FC.FC(vars);
+                solution = FC.Solution;
+            }
+            else {
+                MaintainingArcConsistency MAC = new MaintainingArcConsistency();
+                MAC.MAC(vars);
+                solution = MAC.Solution;
+            }
+            foreach (int[] action in solution) {
                 vars[action[0]].Value = action[1];
             }
             for (int i = 0; i < n * n; i++) {

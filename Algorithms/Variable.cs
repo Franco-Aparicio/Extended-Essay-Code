@@ -7,7 +7,6 @@ namespace Algorithms {
         public int Value;
         public int[,] Domain;
         public int Index;
-        public bool Assigned = false;
         public List<Variable>[] Units = new List<Variable>[3];
         public List<Variable> Peers;
 
@@ -30,6 +29,16 @@ namespace Algorithms {
                 }
             }
             return count;
+        }
+
+        public void RemoveDomain(int n) {
+            int[,] newDom = new int[2,Domain.GetLength(1)-1];
+            for (int i = 0; i < Domain.GetLength(1); i++) {
+                if (i == n) continue;
+                newDom[0, i] = Domain[0, i];
+                newDom[1, i] = Domain[1, i];
+            }
+            Domain = newDom;
         }
     }
 }

@@ -20,18 +20,8 @@ namespace Algorithms {
         }
         
         private Variable SelectVar(Variable[] vars) {
-            Variable var = vars.Where(x => !x.Assigned).OrderBy(x=> x.GetLeft()).ThenBy(x=>r.Next()).First();
+            Variable var = vars.OrderBy(x=> x.GetLeft()).ThenBy(x=>r.Next()).First();
             return var;
-        }
-
-        private Variable[] Clone(Variable[] vars) {
-            Variable[] temp = new Variable[vars.Length];
-            int count = 0;
-            foreach (Variable var in vars) {
-                temp[count] = var;
-                count++;
-            }
-            return temp;
         }
 
         private bool Search(Variable[] vars, int level) {
@@ -44,8 +34,8 @@ namespace Algorithms {
                     return true;
                 }
                 vars = vars.Where(x => x.Index != var.Index).ToArray();
-                if (CheckForward(Clone(vars), level, var, var.Domain[0, i]) &&
-                    Search(Clone(vars), level + 1)) return true;
+                if (CheckForward(vars, level, var, var.Domain[0, i]) &&
+                    Search(vars, level + 1)) return true;
                 Solution.Remove(item);
                 vars = Restore(vars, level);
             }

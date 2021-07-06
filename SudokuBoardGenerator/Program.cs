@@ -32,7 +32,8 @@ namespace SudokuBoardGenerator {
         public static int[,] LeaveClues(int[,] answer) {
             Random r = new Random();
             int squares = answer.GetLength(0)*answer.GetLength(1);
-            int empties = squares * 1 / 4;
+            int n = (int) Math.Sqrt(answer.GetLength(0));
+            int empties = squares * (n - 1) / (n + 1);
             foreach (int c in Enumerable.Range(0, squares).OrderBy(x=>r.Next()).Take(empties)) {
                 answer[c / answer.GetLength(0), c % answer.GetLength(1)] = 0;
             }
@@ -43,8 +44,9 @@ namespace SudokuBoardGenerator {
             string bnum = $"{Math.Sqrt(board.GetLength(0))}";
             string path = Path.GetFullPath("./");
             if (path.Substring(path.Length - 21, 20) != "SudokuBoardGenerator") {
-                path = String.Concat(path, @"../../../boards");
+                path += @"../../../";
             }
+            path += "boards";
             path = Path.GetFullPath(path);
             string[] boards = Directory.GetFiles(path);
             int count = boards.Count(b => b[path.Length+6] == bnum[0]);
