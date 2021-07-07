@@ -30,9 +30,7 @@ namespace Algorithms {
                 if (var.Domain[1, i] != 0) continue;
                 var item = new int[] {var.Index, var.Domain[0, i]};
                 Solution.Add(item);
-                if (vars.Length == 1) {
-                    return true;
-                }
+                if (vars.Length == 1) return true;
                 vars = vars.Where(x => x.Index != var.Index).ToArray();
                 if (CheckForward(vars, level, var, var.Domain[0, i]) &&
                     Search(vars, level + 1)) return true;

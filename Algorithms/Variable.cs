@@ -32,11 +32,13 @@ namespace Algorithms {
         }
 
         public void RemoveDomain(int n) {
+            int count = 0;
             int[,] newDom = new int[2,Domain.GetLength(1)-1];
             for (int i = 0; i < Domain.GetLength(1); i++) {
                 if (i == n) continue;
-                newDom[0, i] = Domain[0, i];
-                newDom[1, i] = Domain[1, i];
+                newDom[0, count] = Domain[0, i];
+                newDom[1, count] = Domain[1, i];
+                count++;
             }
             Domain = newDom;
         }

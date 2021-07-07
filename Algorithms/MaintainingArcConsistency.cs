@@ -7,7 +7,7 @@ namespace Algorithms {
     public class MaintainingArcConsistency {
 
         public List<int[]> Solution;
-        private List<int[]> Q;
+        private List<Variable[]> Q;
         private Random r = new Random();
 
         // public MaintainingArcConsistency() {
@@ -26,12 +26,13 @@ namespace Algorithms {
                 }
             }
             Solution = new List<int[]>();
-            Q = new List<int[]>();
+            Q = new List<Variable[]>();
             foreach (Variable var in vars) {
                 foreach (Variable v in vars) {
                     if (var.Index == v.Index) continue;
                     if (var.Peers.Any(x => x.Index == v.Index)) {
-                        Q = Q.Union(new List<int[]>{new int[]{var.Index, v.Index}}).ToList();
+                        // Q = Q.Union(new List<Variable[]>{new []{var, v}}).ToList();
+                        AddToQ(new []{var, v});
                     }
                 }
             }
@@ -67,7 +68,8 @@ namespace Algorithms {
                     foreach (Variable var in vars) {
                         if (var.Index == arc[1].Index) continue;
                         if (arc[0].Peers.Any(x => x.Index == var.Index)) {
-                            Q = Q.Union(new List<int[]> {new int[] {var.Index, arc[0].Index}}).ToList();
+                            // Q = Q.Union(new List<Variable[]> {new [] {var, arc[0]}}).ToList();
+                            AddToQ(new []{var, arc[0]});
                         }
                     }
                 }
@@ -79,33 +81,32 @@ namespace Algorithms {
             Variable var = SelectVar(vars);
             for (int i = 0; i < var.Domain.GetLength(1); i++) {
                 if (var.Domain[1, i] != 0) continue;
-                var item = new int[] {var.Index, var.Domain[0, i]};
+                var item = new [] {var.Index, var.Domain[0, i]};
                 Solution.Add(item);
                 if (vars.Length == 1) return true;
-                var.RemoveDomain(i);
+                // var.RemoveDomain(i);
                 for (int j = 0; j < var.Domain.GetLength(1); j++) {
-                    if (var.Domain[1, i] != 0) continue;
-                    var.Domain[1, i] = level;
+                    if (var.Domain[1, j] != 0 || j == i) continue;
+                    var.Domain[1, j] = level;
                 }
                 foreach (Variable v in vars) {
-                    if (v.Peers.Any(x => x.Index == var.Index)) {
-                        Q = Q.Union(new List<int[]>{new int[]{v.Index, var.Index}}).ToList();
+                    if (v.Index != var.Index && v.Peers.Any(x => x.Index == var.Index)) {
+                        // Q = Q.Union(new List<Variable[]>{new []{v, var}}).ToList();
+                        AddToQ(new []{v, var});
                     }
                 }
                 vars = vars.Where(x => x.Index != var.Index).ToArray();
                 if (PropagateAC(vars, level) && Search(vars, level + 1)) return true;
                 Solution.Remove(item);
-                Restore(vars, level);
+                vars = Restore(vars, level);
             }
             return false;
         }
         
         private Variable[] SelectArc(Variable[] vars) {
-            Variable var = vars.OrderBy(x=> x.GetLeft()).ThenBy(x=>r.Next()).First();
-            List<int[]> arcs = Q.FindAll(x => x[0] == var.Index);
-            int[] arc = arcs.OrderBy(x=>r.Next()).First();
+            Variable[] arc = Q[r.Next((Q.Count))];
             Q.Remove(arc);
-            return new []{vars[arc[0]], vars[arc[1]]};
+            return new []{arc[0], arc[1]};
         }
         
         private Variable SelectVar(Variable[] vars) {
@@ -133,6 +134,12 @@ namespace Algorithms {
                 }
             }
             return vars;
+        }
+
+        private void AddToQ(Variable[] toAdd) {
+            if (!Q.Any(x => new[] {x[0].Index, x[1].Index}.SequenceEqual(new[] {toAdd[0].Index, toAdd[1].Index}))) {
+                Q.Add(toAdd);
+            }
         }
 
         // private void MakeQ(Variable[] vars) {
