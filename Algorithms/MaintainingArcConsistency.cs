@@ -8,7 +8,7 @@ namespace Algorithms {
 
         public List<int[]> Solution;
         private List<Variable[]> Q;
-        private Random r = new Random();
+        // private Random r = new Random();
 
         // public MaintainingArcConsistency() {
             // foreach (Variable var in vars) {
@@ -60,7 +60,7 @@ namespace Algorithms {
         }
 
         private bool PropagateAC(Variable[] vars, int level) {
-            // Console.WriteLine(level);
+            // Console.WriteLine($"Level: {level}\tQ: {Q.Count}");
             while (Q.Count > 0) {
                 Variable[] arc = SelectArc(vars);
                 if (Revise(arc[0], arc[1], level)) {
@@ -104,13 +104,13 @@ namespace Algorithms {
         }
         
         private Variable[] SelectArc(Variable[] vars) {
-            Variable[] arc = Q[r.Next((Q.Count))];
+            Variable[] arc = Q[0];
             Q.Remove(arc);
             return new []{arc[0], arc[1]};
         }
         
         private Variable SelectVar(Variable[] vars) {
-            Variable var = vars.OrderBy(x=> x.GetLeft()).ThenBy(x=>r.Next()).First();
+            Variable var = vars.OrderBy(x=> x.GetLeft()).First();
             return var;
         }
 
