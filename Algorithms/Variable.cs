@@ -24,7 +24,7 @@ namespace Algorithms {
         public int GetLeft() {
             int count = 0;
             for (int i = 0; i < Domain.GetLength(1); i++) {
-                if (Domain[1, i] != 0) {
+                if (Domain[1, i] == 0) {
                     count++;
                 }
             }

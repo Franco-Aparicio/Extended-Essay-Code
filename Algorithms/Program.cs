@@ -9,8 +9,8 @@ namespace Algorithms {
         
         static void Main(string[] args) {
             int n = 3;
-            int bnum = 1;
-            bool fc = true;
+            int bnum = 4;
+            bool fc = false;
             int[,] board = LoadBoard(n, bnum);
             if (board == null) {
                 Console.WriteLine($"\n\nNo available boards of order {n} in {@"/home/noname/school/EE/ExtendedEssayCode/SudokuBoardGenerator/boards"}");
