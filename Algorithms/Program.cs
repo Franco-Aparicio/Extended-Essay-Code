@@ -8,8 +8,8 @@ namespace Algorithms {
     class Program {
         
         static void Main(string[] args) {
-            int n = 3;
-            int bnum = 4;
+            int n = 4;
+            int bnum = 5;
             bool fc = false;
             int[,] board = LoadBoard(n, bnum);
             if (board == null) {
@@ -20,12 +20,13 @@ namespace Algorithms {
             int[,] defaultDomain = new int[2, n * n];
             for (int i = 0; i < n * n; i++) {
                 defaultDomain[0, i] = i + 1;
+                defaultDomain[1, i] = -1;
             }
             for (int i = 0; i < n * n; i++) {
                 for (int j = 0; j < n * n; j++) {
                     int val = board[i, j];
                     vars[i * n * n + j] = new Variable(val, val != 0 ? 
-                        new int[,] {{val}, {0}} : (int[,]) defaultDomain.Clone(), i * n * n + j);
+                        new int[,] {{val}, {-1}} : (int[,]) defaultDomain.Clone(), i * n * n + j);
                 }
             }
             SetUnitsAndPeers(vars, n);

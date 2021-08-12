@@ -10,7 +10,7 @@ namespace SudokuBoardGenerator {
 
         static void Main(string[] args) {
             // start generating grid
-            int n = 4;
+            int n = 5;
             int[,] answer = null;
             var tasks = new[] {
                 Task.Factory.StartNew(() => new Grid(n).Board),

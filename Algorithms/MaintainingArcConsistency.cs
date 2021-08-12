@@ -8,7 +8,7 @@ namespace Algorithms {
 
         public List<int[]> Solution;
         private List<Variable[]> Q;
-        // private Random r = new Random();
+        private Random r = new Random();
 
         // public MaintainingArcConsistency(Variable[] vars) {
         //     foreach (Variable var in vars) {
@@ -22,7 +22,7 @@ namespace Algorithms {
         public bool MAC(Variable[] vars) {
             foreach (Variable var in vars) {
                 for (int i = 0; i < var.Domain.GetLength(1); i++) {
-                    var.Domain[1, i] = 0;
+                    var.Domain[1, i] = -1;
                 }
             }
             Solution = new List<int[]>();
@@ -42,10 +42,10 @@ namespace Algorithms {
         private bool Revise(Variable var, Variable v, int level) {
             bool deleted = false;
             for (int i = 0; i < var.Domain.GetLength(1); i++) {
-                if (var.Domain[1, i] != 0) continue;
+                if (var.Domain[1, i] != -1) continue;
                 bool found = false;
                 for (int j = 0; j < v.Domain.GetLength(1); j++) {
-                    if (v.Domain[1, j] != 0) continue;
+                    if (v.Domain[1, j] != -1) continue;
                     if (var.Domain[0, i] != v.Domain[0, j]) {
                         found = true;
                         break;
@@ -67,12 +67,9 @@ namespace Algorithms {
                 Q.Remove(arc);
                 if (Revise(arc[0], arc[1], level)) {
                     if (DWO(arc[0])) return false;
-                    foreach (Variable var in vars) {
+                    foreach (Variable var in arc[0].Peers) {
                         if (var.Index == arc[1].Index) continue;
-                        if (var.Peers.Any(x => x.Index == arc[0].Index)) {
-                            // Q = Q.Union(new List<Variable[]> {new [] {var, arc[0]}}).ToList();
-                            AddToQ(new []{var, arc[0]});
-                        }
+                        AddToQ(new []{var, arc[0]});
                     }
                 }
             }
@@ -81,16 +78,16 @@ namespace Algorithms {
 
         private bool Search(Variable[] vars, int level) {
             Variable var = SelectVar(vars);
-            // Console.WriteLine(var.Domain.GetLength(1));
             for (int i = 0; i < var.Domain.GetLength(1); i++) {
-                if (var.Domain[1, i] != 0) continue;
+                // Console.WriteLine(vars.Length);
+                if (var.Domain[1, i] != -1) continue;
                 var item = new [] {var.Index, var.Domain[0, i]};
                 Solution.Add(item);
                 // Console.WriteLine(vars.Length);
                 if (vars.Length == 1) return true;
                 // var.RemoveDomain(i);
                 for (int j = 0; j < var.Domain.GetLength(1); j++) {
-                    if (var.Domain[1, j] != 0 || j == i) continue;
+                    if (var.Domain[1, j] != -1 || j == i) continue;
                     var.Domain[1, j] = level;
                 }
                 foreach (Variable v in vars) {
@@ -99,15 +96,16 @@ namespace Algorithms {
                         AddToQ(new []{v, var});
                     }
                 }
-                vars = vars.Where(x => x.Index != var.Index).ToArray();
-                // if (PropagateAC(vars, level) && Search(vars, level + 1)) return true;
-                bool thing1 = PropagateAC(vars, level);
-                bool thing2 = Search(vars, level + 1);
-                Console.WriteLine($"Level: {level}\tProp: {thing1}\tSearch: {thing2}");
-                if (thing1 && thing2) return true;
+                // vars = vars.Where(x => x.Index != var.Index).ToArray();
+                Variable[] temp = vars.Where(x => x.Index != var.Index).ToArray();
+                if (PropagateAC(temp, level) && Search(temp, level + 1)) return true;
+                // bool thing1 = PropagateAC(vars, level);
+                // bool thing2 = Search(vars, level + 1);
+                // Console.WriteLine($"Level: {level}\tProp: {thing1}\tSearch: {thing2}");
+                // if (thing1 && thing2) return true;
                 Solution.Remove(item);
                 vars = Restore(vars, level);
-                Console.WriteLine(vars.Length);
+                // Console.WriteLine(vars.Length);
             }
             return false;
         }
@@ -119,14 +117,15 @@ namespace Algorithms {
         }
         
         private Variable SelectVar(Variable[] vars) {
-            Variable var = vars.OrderBy(x => x.GetLeft()).First();
+            Variable var = vars.OrderBy(x => x.GetLeft()).ThenBy(x=>r.Next()).First();
+            // Console.WriteLine(var.Index);
             return var;
         }
 
         // Checks for a Domain Wipe-Out due to constraint propagation
         private bool DWO(Variable var) {
             for (int i = 0; i < var.Domain.GetLength(1); i++) {
-                if (var.Domain[1, i] == 0) {
+                if (var.Domain[1, i] == -1) {
                     return false;
                 }
             }
@@ -135,10 +134,11 @@ namespace Algorithms {
 
         // Restores domains to previous state
         private Variable[] Restore(Variable[] vars, int level) {
+            // Console.WriteLine("Restore");
             foreach (Variable var in vars) {
                 for (int i = 0; i < var.Domain.GetLength(1); i++) {
                     if (var.Domain[1, i] == level) {
-                        var.Domain[1, i] = 0;
+                        var.Domain[1, i] = -1;
                     }
                 }
             }

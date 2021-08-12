@@ -12,7 +12,7 @@ namespace Algorithms {
         public bool FC(Variable[] vars) {
             foreach (Variable var in vars) {
                 for (int i = 0; i < var.Domain.GetLength(1); i++) {
-                    var.Domain[1, i] = 0;
+                    var.Domain[1, i] = -1;
                 }
             }
             Solution = new List<int[]>();
@@ -27,7 +27,7 @@ namespace Algorithms {
         private bool Search(Variable[] vars, int level) {
             Variable var = SelectVar(vars);
             for (int i = 0; i < var.Domain.GetLength(1); i++) {
-                if (var.Domain[1, i] != 0) continue;
+                if (var.Domain[1, i] != -1) continue;
                 var item = new int[] {var.Index, var.Domain[0, i]};
                 Solution.Add(item);
                 if (vars.Length == 1) return true;
@@ -44,8 +44,8 @@ namespace Algorithms {
             foreach (Variable v in vars) {
                 if (var.Peers.All(x => x.Index != v.Index)) continue;
                 for (int i = 0; i < v.Domain.GetLength(1); i++) {
-                    if (v.Domain[1, i] != 0) continue;
-                    v.Domain[1, i] = val == v.Domain[0, i] ? level : 0;
+                    if (v.Domain[1, i] != -1) continue;
+                    v.Domain[1, i] = val == v.Domain[0, i] ? level : -1;
                 }
                 if (DWO(v)) return false;
             }
@@ -55,7 +55,7 @@ namespace Algorithms {
         // Checks for a Domain Wipe-Out due to constraint propagation
         private bool DWO(Variable var) {
             for (int i = 0; i < var.Domain.GetLength(1); i++) {
-                if (var.Domain[1, i] == 0) {
+                if (var.Domain[1, i] == -1) {
                     return false;
                 }
             }
@@ -67,7 +67,7 @@ namespace Algorithms {
             foreach (Variable var in vars) {
                 for (int i = 0; i < var.Domain.GetLength(1); i++) {
                     if (var.Domain[1, i] == level) {
-                        var.Domain[1, i] = 0;
+                        var.Domain[1, i] = -1;
                     }
                 }
             }
