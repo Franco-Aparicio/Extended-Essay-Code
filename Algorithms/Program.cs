@@ -8,8 +8,8 @@ namespace Algorithms {
     class Program {
         
         static void Main(string[] args) {
-            int n = 4;
-            int bnum = 1;
+            int n = 5;
+            int bnum = 2;
             bool fc = false;
             int[,] board = LoadBoard(n, bnum);
             if (board == null) {

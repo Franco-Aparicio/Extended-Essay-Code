@@ -7,17 +7,23 @@ namespace Algorithms {
 
         public List<int[]> Solution;
         private List<Variable[]> DeletionStream;
+        private Dictionary<string, List<int>> Unchecked = new ();
         private Dictionary<string, List<int>> Support = new ();
+        private Dictionary<string, List<Variable[]>> MinSupport = new();
         private Random r = new Random();
 
         public bool MAC(Variable[] vars) {
             foreach (Variable var in vars) {
                 for (int i = 0; i < var.Domain.GetLength(1); i++) {
                     var.Domain[1, i] = -1;
-                    foreach (Variable v in vars) {
-                        if (var.Peers.Any(x => x.Index == v.Index)) {
-                            Support[GetKey(var.Index, v.Index, i)] = new List<int>();
-                            // Support.Add(GetKey(var.Index, v.Index, i), new List<int>());
+                    MinSupport[GetKey(var.Index, i)] = new List<Variable[]>();
+                    foreach (Variable v in var.Peers) {
+                        Support[GetKey(var.Index, v.Index, i)] = new List<int>();
+                        Unchecked[GetKey(var.Index, v.Index, i)] = new List<int> {0};
+                        if (v.Domain.GetLength(1) > 1) {
+                            for (int j = 1; j < v.Domain.GetLength(1); j++) {
+                                Unchecked[GetKey(var.Index, v.Index, i)].Add(j);
+                            }
                         }
                     }
                 }
@@ -25,23 +31,13 @@ namespace Algorithms {
             Solution = new List<int[]>();
             DeletionStream = new List<Variable[]>();
             foreach (Variable var in vars) {
-                foreach (Variable v in vars) {
-                    if (var.Peers.Any(x => x.Index == v.Index)) {
-                        for (int i = 0; i < var.Domain.GetLength(1); i++) {
-                            if (var.Domain[1, i] != -1) continue;
-                            int total = 0;
-                            for (int j = 0; j < v.Domain.GetLength(1); j++) {
-                                if (v.Domain[1, j] != -1) continue;
-                                if (var.Domain[0, i] != v.Domain[0, j]) {
-                                    total++;
-                                    Support[GetKey(v.Index, var.Index, j)].Add(i);
-                                }
-                            }
-                            if (total == 0) {
-                                var.Domain[1, i] = 0;
-                                DeletionStream.Add(new [] {var, new Variable(i)});
-                                if (DWO(var)) return false;
-                            }
+                foreach (Variable v in var.Peers) {
+                    for (int i = 0; i < var.Domain.GetLength(1); i++) {
+                        if (var.Domain[1, i] != -1) continue;
+                        if (!SeekSupport(var, v, i)) {
+                            var.Domain[1, i] = 0;
+                            DeletionStream.Add(new [] {var, new Variable(i)});
+                            if (DWO(var)) return false;
                         }
                     }
                 }
@@ -54,15 +50,16 @@ namespace Algorithms {
             while (DeletionStream.Count > 0) {
                 Variable[] arc = DeletionStream[0];
                 DeletionStream.Remove(arc);
-                foreach (Variable var in vars) {
-                    if (arc[0].Peers.Any(x => x.Index == var.Index)) {
-                        foreach (int val in Support[GetKey(arc[0].Index, var.Index, arc[1].Value)]) {
-                            if (var.Domain[1, val] != -1 || SeekSupport(var, arc[0], val)) continue;
-                            // if (SeekSupport(var, arc[0], val)) continue;
-                            var.Domain[1, val] = level;
-                            DeletionStream.Add(new [] {var, new Variable(val)});
-                            if (DWO(var)) return false;
-                        }
+                for (int p = 0; p < MinSupport[GetKey(arc[0].Index, arc[1].Value)].Count; p++) {
+                    Variable[] pair = MinSupport[GetKey(arc[0].Index, arc[1].Value)][p];
+                    if (pair[0].Domain[1, pair[1].Value] != -1 || vars.All(x => x.Index != pair[0].Index)) continue;
+                    if (SeekSupport(pair[0], arc[0], pair[1].Value)) {
+                        MinSupport[GetKey(arc[0].Index, arc[1].Value)].Remove(pair);
+                    }
+                    else {
+                        pair[0].Domain[1, pair[1].Value] = level;
+                        DeletionStream.Add(pair);
+                        if (DWO(pair[0])) return false;
                     }
                 }
             }
@@ -91,7 +88,19 @@ namespace Algorithms {
 
         private bool SeekSupport(Variable var, Variable v, int valIndex) {
             foreach (int val in Support[GetKey(var.Index, v.Index, valIndex)]) {
-                if (v.Domain[1, val] == -1) return true;
+                if (v.Domain[1, val] != -1) continue;
+                MinSupport[GetKey(v.Index, val)].Add(new [] {var, new Variable(valIndex)});
+                return true;
+            }
+            for (int value = 0; value < Unchecked[GetKey(var.Index, v.Index, valIndex)].Count; value++) {
+                int val = Unchecked[GetKey(var.Index, v.Index, valIndex)][value];
+                if (v.Domain[1, val] != -1) continue;
+                Unchecked[GetKey(var.Index, v.Index, valIndex)].Remove(val);
+                if (var.Domain[0, valIndex] == v.Domain[0, val]) continue;
+                Support[GetKey(v.Index, var.Index, val)].Add(valIndex);
+                Support[GetKey(var.Index, v.Index, valIndex)].Add(val);
+                MinSupport[GetKey(v.Index, val)].Add(new [] {var, new Variable(valIndex)});
+                return true;
             }
             return false;
         }
@@ -125,6 +134,10 @@ namespace Algorithms {
 
         private string GetKey(int var1, int var2, int val) {
             return $"{var1},{var2},{val}";
+        }
+        
+        private string GetKey(int var1, int val) {
+            return $"{var1},{val}";
         }
     }
 }
