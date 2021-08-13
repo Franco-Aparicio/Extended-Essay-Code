@@ -7,7 +7,6 @@ namespace Algorithms {
         public int Value;
         public int[,] Domain;
         public int Index;
-        public List<Variable>[] Units = new List<Variable>[3];
         public List<Variable> Peers;
 
         public Variable(int value, int[,] domain, int index) {
@@ -16,8 +15,11 @@ namespace Algorithms {
             Index = index;
         }
 
-        public void SetUnitsAndPeers(List<Variable>[] units, List<Variable> peers) {
-            Units = units;
+        public Variable(int value) {
+            Value = value;
+        }
+
+        public void SetPeers(List<Variable> peers) {
             Peers = peers;
         }
 

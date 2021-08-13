@@ -9,7 +9,7 @@ namespace Algorithms {
         
         static void Main(string[] args) {
             int n = 4;
-            int bnum = 5;
+            int bnum = 1;
             bool fc = false;
             int[,] board = LoadBoard(n, bnum);
             if (board == null) {
@@ -29,7 +29,7 @@ namespace Algorithms {
                         new int[,] {{val}, {-1}} : (int[,]) defaultDomain.Clone(), i * n * n + j);
                 }
             }
-            SetUnitsAndPeers(vars, n);
+            SetPeers(vars, n);
             List<int[]> solution = null;
             if (fc) {
                 ForwardChecking FC = new ForwardChecking();
@@ -37,7 +37,7 @@ namespace Algorithms {
                 solution = FC.Solution;
             }
             else {
-                MaintainingArcConsistency MAC = new MaintainingArcConsistency();
+                ImprovedMaintainingArcConsistency MAC = new ImprovedMaintainingArcConsistency();
                 MAC.MAC(vars);
                 solution = MAC.Solution;
             }
@@ -52,7 +52,7 @@ namespace Algorithms {
             PrintBoard(board);
         }
         
-        private static void SetUnitsAndPeers(Variable[] vars, int n) {
+        private static void SetPeers(Variable[] vars, int n) {
             int ii = 0;
             for (int i = 0; i < n * n; i++) {
                 int corrector = 0;
@@ -60,22 +60,16 @@ namespace Algorithms {
                 for (int j = 0; j < n * n; j++) {
                     int kk = i / n * n * n * n;
                     List<Variable> peers = new List<Variable>();
-                    List<Variable>[] units = new List<Variable>[3];
-                    List<Variable> row = new List<Variable>();
-                    List<Variable> col = new List<Variable>();
-                    List<Variable> box = new List<Variable>();
                     Variable v1 = vars[i * n * n + j];
                     for (int k = 0; k < n * n; k++) {
                         Variable v2 = vars[i * n * n + k];
                         if (v1.Index != v2.Index) {
-                            row.Add(v2);
                             if (peers.All(x => x.Index != v2.Index)) {
                                 peers.Add(v2);
                             }
                         }
                         v2 = vars[k * n * n + j];
                         if (v1.Index != v2.Index) {
-                            col.Add(v2);
                             if (peers.All(x => x.Index != v2.Index)) {
                                 peers.Add(v2);
                             }
@@ -83,17 +77,13 @@ namespace Algorithms {
                         corrector = j % n == 0 && j != 0 ? n * (j / n): corrector;
                         v2 = vars[kk + corrector];
                         if (v1.Index != v2.Index) {
-                            box.Add(v2);
                             if (peers.All(x => x.Index != v2.Index)) {
                                 peers.Add(v2);
                             }
                         }
                         kk = k % n == n - 1 ? kk + n * (n - 1) + 1 : kk + 1;
                     }
-                    units[0] = row;
-                    units[1] = col;
-                    units[2] = box;
-                    v1.SetUnitsAndPeers(units, peers);
+                    v1.SetPeers(peers);
                     jj = j % n == n - 1 ? jj + n * (n - 1) + 1 : jj + 1;
                 }
                 ii = i % n == n - 1 ? ii + n * n * (n - 1) + n: ii + n;
