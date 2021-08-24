@@ -2,7 +2,7 @@
 
 namespace SudokuBoardGenerator {
     class Cell : IComparable<Cell> {
-        // cell coordinates
+        // Cell coordinates
         public int X;
         public int Y;
 
@@ -19,10 +19,8 @@ namespace SudokuBoardGenerator {
 
         // Use this to randomize sort order
         int I = Grid.Rand.Next();
-
-        /**
-         * Constructor
-         */
+        
+        /// Constructor 
         public Cell(int x, int y, Group row, Group column, Group box, int numValues) {
             X = x;
             Y = y;
@@ -30,18 +28,16 @@ namespace SudokuBoardGenerator {
             Column = column;
             Box = box;
 
-            // assign to groups
+            // Assign to groups
             row.AddCell(this);
             column.AddCell(this);
             box.AddCell(this);
 
-            // init possible values
+            // Init possible values
             PossibleValues = PossibleValues.Substring(0, numValues);
         }
 
-        /**
-         * Assign a value to this cell while removing it from possible values of related cells
-         */
+        /// Assign a value to this cell while removing it from possible values of related cells 
         public void AssignValue(char value) {
             if (PossibleValues.Length > 0 && PossibleValues.IndexOf(value) != -1) {
                 RemoveValueFromGroups(value);
@@ -49,22 +45,18 @@ namespace SudokuBoardGenerator {
                 Value = value;
             }
         }
-
-        /**
-         * Remove a value from possible values
-         */
+        
+        /// Remove a value from possible values 
         protected void RemoveValue(char value) {
             int index = PossibleValues.IndexOf(value);
 
-            // remove value if exists in possible values
+            // Remove value if exists in possible values
             if (index != -1) {
                 PossibleValues = PossibleValues.Remove(index, 1);
             }
         }
 
-        /**
-         * Remove a value from all related group members
-         */
+        /// Remove a value from all related group members 
         protected void RemoveValueFromGroups(char value) {
             for (int i = 0; i < Row.Cells.Length; i++) {
                 Row.Cells[i].RemoveValue(value);
@@ -73,18 +65,14 @@ namespace SudokuBoardGenerator {
             }
         }
 
-        /**
-         * Used to sort cells randomly using their assigned RNG value I
-         */
+        /// Used to sort cells randomly using their assigned RNG value I 
         public int CompareTo(Cell c) {
             if (c == null) return 0;
 
             return I.CompareTo(c.I);
         }
 
-        /**
-         * Regenerate the RNG value
-         */
+        /// Regenerate the RNG value 
         public void ReseedRng() {
             I = Grid.Rand.Next();
         }

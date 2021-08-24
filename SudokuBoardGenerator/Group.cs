@@ -6,23 +6,17 @@ namespace SudokuBoardGenerator {
 
         protected int Index = 0;
 
-        /**
-         * Constructor
-         */
+        /// Constructor 
         public Group (int numCells) {
             Cells = new Cell[numCells];
         }
 
-        /**
-         * Add a cell to the group
-         */
+        /// Add a cell to the group 
         public void AddCell (Cell cell) {
             Cells[Index++] = cell;
         }
 
-        /**
-         * Get a sorted set of all cells that can potential have the given value
-         */
+        /// Get a sorted set of all cells that can potential have the given value 
         public SortedSet<Cell> GetCandidates (char value) {
             SortedSet<Cell> candidates = new SortedSet<Cell>();
 

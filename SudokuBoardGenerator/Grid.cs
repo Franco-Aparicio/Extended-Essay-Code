@@ -4,10 +4,10 @@ using System.Text;
 
 namespace SudokuBoardGenerator {
     class Grid {
-        //static Grid Instance;
+        // Static Grid Instance 
 
-        string PossibleValues = Program.valueList;
-        public int BoxSideLength;
+        string PossibleValues = Program.valueList; // Domain of possible values 
+        public int BoxSideLength; // Board order 
 
         public static Random Rand = new Random();
 
@@ -19,9 +19,7 @@ namespace SudokuBoardGenerator {
 
         protected static bool CompletedGrid = false;
 
-        /**
-         * Constructor
-         */
+        /// Constructor 
         public Grid (int boxSideLength) {
             int sideLength = boxSideLength * boxSideLength;
 
@@ -32,7 +30,7 @@ namespace SudokuBoardGenerator {
             Columns = new Group[sideLength];
             Boxes = new Group[sideLength];
 
-            // instantiate the groups
+            // Instantiate the groups
             for (int i=0; i<sideLength; i++) {
                 Rows[i] = new Group(sideLength);
                 Columns[i] = new Group(sideLength);
@@ -41,51 +39,39 @@ namespace SudokuBoardGenerator {
 
             Cells = new Cell[sideLength * sideLength];
 
-            // instantiate the cells
+            // Instantiate the cells
             for (int y=0; y<sideLength; y++) {
                 for (int x=0; x<sideLength; x++) {
                     int boxIndex = (x / boxSideLength) + (y / boxSideLength) * boxSideLength;
-
                     Cells[x + y * sideLength] = new Cell(x, y, Rows[y], Columns[x], Boxes[boxIndex], sideLength);
                 }
             }
 
-            // start building the grid
-            // Assign the cell values
+            // Start building the grid and assign the cell values
             while (!PopulateChar(PossibleValues[0])) {
-                // reset Rng if complete failure occurs
+                // Reset Rng if complete failure occurs
                 foreach (Cell cell in Cells) {
                     cell.ReseedRng();
                 }
             }
 
-            // first completed grid
+            // First completed grid
             if (!CompletedGrid) {
                 CompletedGrid = true;
-                // Draw();
-                Board = MakeUseful();
-                // PrintBoard(Board);
+                Board = MakeUseful(); // Make board in terms of integers 
             }
         }
 
-        /** 
-         * Used to recursively feed values into the AssignValues method
-         */
+        /// Used to recursively feed values into the AssignValues method 
         protected bool PopulateChar(char value) {
-            //Console.SetCursorPosition(0, 0);
-            //Draw();
-
-            // check for completed grid, end processing
+            // Check for completed grid, end processing
             if (CompletedGrid) {
                 return true;
             }
-
             return AssignValues(Boxes[0], value);
         }
 
-        /**
-         * Used to recursively assign the given value to a cell in each box group
-         */
+        /// Used to recursively assign the given value to a cell in each box group
         protected bool AssignValues(Group box, char value) {
 
             var candidates = box.GetCandidates(value);
@@ -93,12 +79,12 @@ namespace SudokuBoardGenerator {
             if (candidates.Count > 0) {
 
                 foreach (Cell cell in candidates) {
-                    // check for completed grid, end processing
+                    // Check for completed grid, end processing
                     if (CompletedGrid) {
                         return true;
                     }
 
-                    // save current state of grid
+                    // Save current state of grid
                     State[] states = new State[Cells.Length];
                     for (int i=0; i<Cells.Length; i++) {
                         states[i] = new State(Cells[i].Value, Cells[i].PossibleValues);
@@ -106,14 +92,14 @@ namespace SudokuBoardGenerator {
 
                     cell.AssignValue(value);
 
-                    // determine if this cell will cause the next box to error
+                    // Determine if this cell will cause the next box to error
                     int index = Array.IndexOf(Boxes, box);
                     int gridRowIndex = index / BoxSideLength;
                     int gridColIndex = index % BoxSideLength;
 
                     bool causesError = false;
                     for (int i = index + 1; i < Boxes.Length; i++) {
-                        if (/*i > BoxSideLength * 2 &&*/ gridRowIndex != i / BoxSideLength || gridColIndex != i % BoxSideLength) continue;
+                        if (gridRowIndex != i / BoxSideLength || gridColIndex != i % BoxSideLength) continue;
 
                         bool hasFreeCell = false;
                         foreach (Cell testCell in Boxes[i].Cells) {
@@ -128,59 +114,37 @@ namespace SudokuBoardGenerator {
                         }
                     }
 
-                    // move on to next box if no error
+                    // Move on to next box if no error
                     if (!causesError) {
                         int nextBoxIndex = index + 1;
 
                         if (nextBoxIndex == Boxes.Length) {
-                            // start assigning next character
+                            // Start assigning next character
                             int indexOfNextChar = PossibleValues.IndexOf(value) + 1;
 
                             // Check for grid completion
                             if (indexOfNextChar == PossibleValues.Length) return true;
 
-                            // move on to next char
+                            // Move on to next char
                             if (PopulateChar(PossibleValues[indexOfNextChar])) return true;
                         }
                         else {
-                            // recurse through next box
+                            // Recurse through next box
                             if (AssignValues(Boxes[nextBoxIndex], value)) return true;
                         }
                     }
 
-                    // undo changes made in this recursion layer
+                    // Undo changes made in this recursion layer
                     for (int i = 0; i < Cells.Length; i++) {
                         Cells[i].Value = states[i].Value;
                         Cells[i].PossibleValues = states[i].PossibleValues;
                     }
                 }
             }
-            return false; // no viable options, go back to previous box or previous character
+            return false; // No viable options, go back to previous box or previous character
         }
 
-        /**
-         * Output the grid to console
-         */
-        public void Draw() {
-            int rowCounter = 0;
-
-            foreach (Group row in Rows) {
-                StringBuilder rowString = new StringBuilder();
-                foreach (Cell cell in row.Cells) {
-                    rowString.Append(cell.Value);
-                    rowString.Append(' ', 2);
-                }
-
-                rowCounter++;
-                if (rowCounter == BoxSideLength) {
-                    rowCounter = 0;
-                    Console.WriteLine(rowString.Append('\n').Append('-', Rows.Length*3));
-                }
-                else
-                    Console.WriteLine(rowString + "\n");
-            }
-        }
-
+        /// Makes the board in terms of integer values 
         private int[,] MakeUseful() {
             int[,] board = new int[Rows.Length, Rows.Length];
             for (int i = 0; i < Rows.Length; i++) {
@@ -196,10 +160,9 @@ namespace SudokuBoardGenerator {
             return board;
         }
         
+        /// Displays board on console 
         public static void PrintBoard(int[,] b) {
             int n = (int) Math.Sqrt((double) b.GetLength(0));
-            // Console.WriteLine("\n\x1B[4m" + new String(' ', n * n + n + 1) + "\x1B[0m");
-            // Console.WriteLine(new String('-', b.GetLength(0)*3+5));
             for (int i = 0; i < b.GetLength(0); i++) {
                 if (i % n == 0) {
                     Console.WriteLine(new String('-', b.GetLength(0)*3+2*n));
@@ -211,7 +174,6 @@ namespace SudokuBoardGenerator {
                         Console.Write("{0, -2}", "|");
                     }
                 }
-                // Console.WriteLine("\x1B[0m");
                 Console.WriteLine();
             }
             Console.WriteLine(new String('-', b.GetLength(0)*3+2*n));

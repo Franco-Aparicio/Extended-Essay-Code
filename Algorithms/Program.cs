@@ -8,13 +8,16 @@ namespace Algorithms {
     class Program {
         
         static void Main(string[] args) {
-            bool fc = args[0] == "f";
-            int n = int.Parse(args[1]);
-            int bnum = int.Parse(args[2]);
-            int trial = int.Parse(args[3]);
-            int[,] board = LoadBoard(n, bnum);
-            if (board == null) return;
-            Variable[] vars = new Variable[n * n * n * n];
+            bool fc = args[0] == "f"; // Get argument to know which algorithm to use 
+            int n = int.Parse(args[1]); // Get argument to know which board order to solve
+            int bnum = int.Parse(args[2]); // Get argument to know which board to solve
+            int[,] board = LoadBoard(n, bnum); // Load specified board from file
+            if (board == null) {
+                Console.WriteLine("\nBoard not found! Please try again.");
+                return;
+            }
+            Variable[] vars = new Variable[n * n * n * n]; // Array of all Variables
+            // Default domain for variables with more than one value in their domains 
             int[,] defaultDomain = new int[2, n * n];
             for (int i = 0; i < n * n; i++) {
                 defaultDomain[0, i] = i + 1;
@@ -23,16 +26,19 @@ namespace Algorithms {
             for (int i = 0; i < n * n; i++) {
                 for (int j = 0; j < n * n; j++) {
                     int val = board[i, j];
+                    // Add each Variable to vars depending on the values from the loaded board
                     vars[i * n * n + j] = new Variable(val, val != 0 ? 
                         new int[,] {{val}, {-1}} : (int[,]) defaultDomain.Clone(), i * n * n + j);
                 }
             }
-            SetPeers(vars, n);
+            SetPeers(vars, n); // Sets all the peers for each Variable 
+            // Initialize solution and data variables 
             List<int[]> solution = null;
             int nodes = 0;
             int checks = 0;
             int backs = 0;
             double time = 0;
+            // Solve the problem given vars and return the data 
             if (fc) {
                 ForwardChecking FC = new ForwardChecking();
                 FC.FC(vars);
@@ -51,6 +57,7 @@ namespace Algorithms {
                 backs = MAC.Backs;
                 time = MAC.Time;
             }
+            // Perform every action in the solution
             foreach (int[] action in solution) {
                 vars[action[0]].Value = action[1];
             }
@@ -59,10 +66,11 @@ namespace Algorithms {
                     board[i, j] = vars[i * n * n + j].Value;
                 }
             }
-            // PrintBoard(board);
-            SaveData(args, nodes, checks, backs, time);
+            PrintBoard(board); // Display the solution 
+            SaveData(args, nodes, checks, backs, time); // Save all the data to a .txt file 
         }
         
+        /// Maps each variable with the variables that constrain it 
         private static void SetPeers(Variable[] vars, int n) {
             int ii = 0;
             for (int i = 0; i < n * n; i++) {
@@ -101,6 +109,7 @@ namespace Algorithms {
             }
         }
         
+        /// Load specified board from file 
         private static int[,] LoadBoard(int n, int bnum) {
             string path = Path.GetFullPath("./");
             if (path.Substring(path.Length - 11, 10) != "Algorithms") {
@@ -108,18 +117,7 @@ namespace Algorithms {
             }
             path += @"../SudokuBoardGenerator/boards/";
             path = Path.GetFullPath(path);
-            string[] boards = Directory.GetFiles(path);
             string bname = $"board{n}.{bnum}.txt";
-            // try {
-            //     bname = boards.Single(b => b.Substring(path.Length + 6, 3) == $"{n}.{bnum}");
-            // }
-            // catch (Exception e) {
-            //     if (e is ArgumentNullException or InvalidOperationException) {
-            //         Console.WriteLine($"\n\nNo available boards of order {n} in {path}");
-            //         return null;
-            //     }
-            //     throw;
-            // }
             int[,] board = new int[n*n, n*n];
             using (StreamReader reader = new StreamReader(path + bname)) {
                 string line = reader.ReadLine();
@@ -133,11 +131,10 @@ namespace Algorithms {
             }
             return board;
         }
-
+        
+        ///  Prints given board to the console 
         private static void PrintBoard(int[,] b) {
             int n = (int) Math.Sqrt((double) b.GetLength(0));
-            // Console.WriteLine("\n\x1B[4m" + new String(' ', n * n + n + 1) + "\x1B[0m");
-            // Console.WriteLine(new String('-', b.GetLength(0)*3+5));
             for (int i = 0; i < b.GetLength(0); i++) {
                 if (i % n == 0) {
                     Console.WriteLine(new String('-', b.GetLength(0)*3+2*n));
@@ -149,17 +146,13 @@ namespace Algorithms {
                         Console.Write("{0, -2}", "|");
                     }
                 }
-                // Console.WriteLine("\x1B[0m");
                 Console.WriteLine();
             }
             Console.WriteLine(new String('-', b.GetLength(0)*3+2*n));
         }
-
+        
+        /// Save all the data to a .txt file 
         private static async void SaveData(string[] args, int nodes, int checks, int backs, double time) {
-            // Console.WriteLine($"Nodes visited: {nodes}");
-            // Console.WriteLine($"Constraint checks: {checks}");
-            // Console.WriteLine($"Backtracks: {backs}");
-            // Console.WriteLine($"Time taken (ms): {time}");
             string path = Path.GetFullPath("./");
             if (path.Substring(path.Length - 11, 10) != "Algorithms") path += @"../../../";
             path += @$"../Algorithms/data/raw/{args[0]}.{args[1]}.{args[2]}.{args[3]}.txt";
